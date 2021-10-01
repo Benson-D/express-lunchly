@@ -7,42 +7,34 @@ const express = require("express");
 const Customer = require("./models/customer");
 const Reservation = require("./models/reservation");
 
-const router = new express.Router();
+const { BadRequestError } = require("./expressError");
 
-let searchCustomers = null;
+const router = new express.Router();
 
 /** Homepage: show list of customers. */
 
 router.get("/", async function (req, res, next) {
-  if (searchCustomers){
-    const customers = searchCustomers;
-    searchCustomers = null;
-    return res.render("customer_list.html", { customers })
-  }
-  
   const customers = await Customer.all();
-  // console.log("in solution routes file");
-  // console.log(customers);
+
   return res.render("customer_list.html", { customers });
 });
 
-/** Search homepage: redirects to homepage when search submitted. */
+// /** Search homepage: redirects to homepage when search submitted. */
 
-router.post("/search/", async function(req, res, next) {
-  const searchTerm = req.body.searchTerm
-  searchCustomers = await Customer.searchDb(searchTerm)
-  return res.redirect("/")
+router.get("/search/", async function (req, res, next) {
+  const searchTerm = req.query.searchTerm;
+  const searchTermArr = searchTerm.split(" ");
+  const customers = await Customer.searchDb(searchTermArr.join(""));
+
+  return res.render("customer_list.html", { customers });
 });
-
-//make above a get request with req.query
 
 /** Homepage: show list of top customers. */
 
-router.get("/top-ten/", async function(req, res, next){
-  const customers = await Customer.topCustomers()
+router.get("/top-ten/", async function (req, res, next) {
+  const customers = await Customer.topCustomers();
   return res.render("top_customers.html", { customers });
-})
-
+});
 
 /** Form to add a new customer. */
 
@@ -94,10 +86,23 @@ router.post("/:id/edit/", async function (req, res, next) {
 /** Handle adding a new reservation. */
 
 router.post("/:id/add-reservation/", async function (req, res, next) {
+  // if (req.body.startAt === undefined || req.body.numGuests === undefined) {
+  //   throw new BadRequestError("Invalid Response");
+  // }
+  // let startAt;
+  // try {
+  //   startAt = new Date(req.body.startAt);
+  // } catch (err) {
+  //   console.log(err.message);
+  //   throw new BadRequestError("Format Date");
+  // }
+  const { startAtDate, startAtTime } = req.body;
+  // startAtDate + ' ' + startAttime + ':00';
+
   const customerId = req.params.id;
-  const startAt = new Date(req.body.startAt);
-  // Change inputs startAt, and add another input,
-  // date + req.body.startAttime
+  // const startAt = new Date(req.body.startAtDate);
+  const startAt = `${startAtDate} ${startAtTime}:00`;
+  console.log(startAtDate, "Date", startAtTime, "Time");
   const numGuests = req.body.numGuests;
   const notes = req.body.notes;
 

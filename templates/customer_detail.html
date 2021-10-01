@@ -31,21 +31,25 @@ customer.lastName }}{% endblock %} {% block content %}
     <h3>New Reservation</h3>
     <form action="/{{ customer.id }}/add-reservation/" method="POST">
       <div class="form-group">
-        <label for="start">Start</label>
+        <label for="start">Date of Reservation</label>
+        <!-- ADD TYPE OF DATE, ALSO SEPERATE input of time, THEN RECEIVE FORMS, concat strings, make new date to this format"yyyy-mm-dd hh:mm am/pm"-->
+        <!-- DELETED: placeholder="yyyy-mm-dd hh:mm am/pm" -->
         <input
           id="start"
           class="form-control"
-          name="startAt"
-          placeholder="yyyy-mm-dd hh:mm am/pm"
+          name="startAtDate"
+          required
+          type="date"
         />
-        <!-- ADD input to work out saving reservations function -->
-        <!-- <input
-          id="start"
+      </div>
+      <div class="form-group">
+        <label for="num-Time">Time of Reservation</label>
+        <input
+          id="num-Time"
           class="form-control"
           name="startAtTime"
-          placeholder="yyyy-mm-dd hh:mm am/pm"
           type="time"
-        /> -->
+        />
       </div>
       <div class="form-group">
         <label for="num-guests"># of Guests:</label>
