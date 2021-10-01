@@ -9,14 +9,40 @@ const Reservation = require("./models/reservation");
 
 const router = new express.Router();
 
+let searchCustomers = null;
+
 /** Homepage: show list of customers. */
 
 router.get("/", async function (req, res, next) {
+  if (searchCustomers){
+    const customers = searchCustomers;
+    searchCustomers = null;
+    return res.render("customer_list.html", { customers })
+  }
+  
   const customers = await Customer.all();
-  console.log("in solution routes file");
-  console.log(customers);
+  // console.log("in solution routes file");
+  // console.log(customers);
   return res.render("customer_list.html", { customers });
 });
+
+/** Search homepage: redirects to homepage when search submitted. */
+
+router.post("/search/", async function(req, res, next) {
+  const searchTerm = req.body.searchTerm
+  searchCustomers = await Customer.searchDb(searchTerm)
+  return res.redirect("/")
+});
+
+//make above a get request with req.query
+
+/** Homepage: show list of top customers. */
+
+router.get("/top-ten/", async function(req, res, next){
+  const customers = await Customer.topCustomers()
+  return res.render("top_customers.html", { customers });
+})
+
 
 /** Form to add a new customer. */
 

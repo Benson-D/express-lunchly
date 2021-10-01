@@ -90,6 +90,42 @@ class Customer {
   fullName() {
     return `${this.firstName} ${this.lastName}`;
   }
+
+
+  /** Function that returns list of customers based on search term */
+  static async searchDb(searchTerm){
+    const results = await db.query(
+      `SELECT id,
+                  first_name AS "firstName",
+                  last_name  AS "lastName",
+                  phone,
+                  notes
+           FROM customers
+           WHERE first_name LIKE $1 OR last_name LIKE $1
+           ORDER BY last_name, first_name`,
+           [searchTerm]
+    );
+    console.log("results from query", results)
+    return results.rows.map((c) => new Customer(c));
+  }
+
+   /** Function that returns list of top customers */
+  static async topCustomers() {
+    const results = await db.query(
+      `SELECT customers.id,
+                  first_name AS "firstName",
+                  last_name  AS "lastName",
+                  phone,
+                  customers.notes
+           FROM customers
+           JOIN reservations ON  customers.id = reservations.customer_id
+           GROUP BY customers.id, first_name, last_name
+           ORDER BY COUNT(reservations.customer_id) DESC
+           LIMIT 10`)
+
+    return results.rows.map((c) => new Customer(c));
+  };
 }
+
 
 module.exports = Customer;
